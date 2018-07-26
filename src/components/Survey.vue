@@ -147,7 +147,7 @@ export default {
     submit() {
       this.loading = true;
       const date = new Date();
-      firebase.firebase
+      firebase
         .database()
         .ref('surveys/')
         .push({

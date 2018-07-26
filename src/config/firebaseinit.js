@@ -1,4 +1,5 @@
-const firebase = require('firebase/app');
+import firebase from 'firebase/app';
+
 require('firebase/database');
 const configData = require('./config.json');
 
@@ -10,10 +11,7 @@ const config = {
   projectId: configData.projectId,
   messagingSenderId: configData.messagingSenderId,
 };
-firebase.initializeApp(config);
-const database = firebase.database();
+const firebaseApp = firebase.initializeApp(config);
+// const database = firebase.database();
 
-module.exports = {
-  firebase,
-  database,
-};
+export default firebaseApp;

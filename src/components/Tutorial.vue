@@ -31,7 +31,7 @@ export default {
     beginPuzzle() {
       const group = this.intervals[this.getControlGroup()];
       this.newControlGroup(group);
-      firebase.firebase
+      firebase
         .database()
         .ref()
         .child(`/surveys/${this.key}`)
