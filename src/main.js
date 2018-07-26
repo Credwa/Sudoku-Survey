@@ -1,14 +1,17 @@
 import Vue from 'vue';
-import Antd from 'vue-antd-ui';
-import '../node_modules/vue-antd-ui/dist/antd.css';
+import Vuetify from 'vuetify';
+import 'vuetify/dist/vuetify.min.css';
+import 'material-design-icons-iconfont/dist/material-design-icons.css';
 import App from './App.vue';
 import router from './router';
-import store from './store';
+import store from './store/index';
 import './registerServiceWorker';
+
+window.$ = window.jQuery = require('jquery');
 
 Vue.config.productionTip = false;
 
-Vue.use(Antd);
+Vue.use(Vuetify);
 
 new Vue({
   router,

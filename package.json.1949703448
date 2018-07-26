@@ -13,8 +13,8 @@
     "material-design-icons-iconfont": "^3.0.3",
     "register-service-worker": "^1.0.0",
     "vue": "^2.5.16",
+    "vue-antd-ui": "^1.0.0",
     "vue-router": "^3.0.1",
-    "vuejs-countdown": "^0.2.1",
     "vuex": "^3.0.1"
   },
   "devDependencies": {
