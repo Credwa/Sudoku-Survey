@@ -266,6 +266,11 @@
       //save important board elements
       $boardInputs = $board.find("input");
       $boardInputCandidates = $board.find(".candidates");
+      Object.values($boardInputs).forEach(val => {
+        if (val.value) {
+          $(val).attr("disabled", "disabled");
+        }
+      });
     };
 
     /* renderBoardCell
@@ -326,9 +331,9 @@
         var newVal = board[i].val;
         //if(newVal && parseInt($input.val()) !== newVal) {
         $input.val(newVal);
-        if (paintNew) $input.addClass("highlight-val");
-        //}
-        var $candidates = $input.siblings(".candidates");
+        if (paintNew)
+          //}
+          var $candidates = $input.siblings(".candidates");
         $candidates.html(buildCandidatesString(board[i].candidates));
       });
     };
@@ -342,13 +347,10 @@
       //log("updateUIBoardCell: "+cellIndex);
       //if(!(opts.mode && opts.mode === "only-candidates")){
       var newVal = board[cellIndex].val;
-
-      //$boardInputs.removeClass("highlight-val");
+      $boardInputs.removeClass("highlight-val");
 
       //shouldn't always add hightlight-val class
-      $("#input-" + cellIndex)
-        .val(newVal)
-        .addClass("highlight-val");
+      $("#input-" + cellIndex).addClass("highlight-val");
       //}
       $("#input-" + cellIndex + "-candidates").html(
         buildCandidatesString(board[cellIndex].candidates)
@@ -388,8 +390,8 @@
           cellUpdated = true;
         }
       }
-      if (cellUpdated && solveMode === SOLVE_MODE_STEP)
-        updateUIBoardCell(cell, { mode: "only-candidates" });
+      // if (cellUpdated && solveMode === SOLVE_MODE_STEP)
+      //   updateUIBoardCell(cell, { mode: "only-candidates" });
     };
 
     /* removeCandidatesFromCells
@@ -1743,7 +1745,8 @@
       hideCandidates: hideCandidates,
       showCandidates: showCandidates,
       setEditingCandidates: setEditingCandidates,
-      generateBoard: generateBoard
+      generateBoard: generateBoard,
+      isBoardFinished: isBoardFinished
     };
   };
 })(window, jQuery);

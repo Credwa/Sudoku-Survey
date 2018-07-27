@@ -16,6 +16,9 @@ export const changeAppDisplay = (state, id) => {
       state.app.isPlaying = true;
       break;
     default:
+      state.app.isSurvey = false;
+      state.app.isTutorial = false;
+      state.app.isPlaying = false;
       break;
   }
 };

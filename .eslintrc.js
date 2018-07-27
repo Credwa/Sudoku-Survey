@@ -14,7 +14,11 @@ module.exports = {
     "import/extensions": 1,
     "no-unused-vars": 1,
     "import/prefer-default-export": 0,
-    "no-param-reassign": 0
+    "no-param-reassign": 0,
+    "global-require": 1,
+    "comma-style": 0,
+    indent: 0,
+    "no-trailing-spaces": 0
   },
   parserOptions: {
     parser: "babel-eslint"

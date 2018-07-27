@@ -190,17 +190,17 @@ export default {
       this.tag,
       this.$scopedSlots.default
         ? [
-          this.$scopedSlots.default({
-            days: preprocess(this.days),
-            hours: preprocess(this.hours),
-            minutes: preprocess(this.minutes),
-            seconds: preprocess(this.seconds),
-            totalDays: preprocess(this.totalDays),
-            totalHours: preprocess(this.totalHours),
-            totalMinutes: preprocess(this.totalMinutes),
-            totalSeconds: preprocess(this.totalSeconds),
-          }),
-        ]
+            this.$scopedSlots.default({
+              days: preprocess(this.days),
+              hours: preprocess(this.hours),
+              minutes: preprocess(this.minutes),
+              seconds: preprocess(this.seconds),
+              totalDays: preprocess(this.totalDays),
+              totalHours: preprocess(this.totalHours),
+              totalMinutes: preprocess(this.totalMinutes),
+              totalSeconds: preprocess(this.totalSeconds),
+            }),
+          ]
         : this.$slots.default,
     );
   },
@@ -255,6 +255,65 @@ export default {
     restart() {
       this.count = this.initalCount;
       this.init();
+    },
+
+    /**
+     * Helper function - converts milliseconds to seconds
+     * @private
+     * @emits Countdown#countdowntimeelapsed
+     */
+    convertToSeconds(time) {
+      // const { interval } = this;
+      const seconds = (time % MILLISECONDS_MINUTE) / MILLISECONDS_SECOND;
+
+      // if (interval < 10) {
+      //   return parseFloat(seconds.toFixed(3));
+      // } else if (interval >= 10 && interval < 100) {
+      //   return parseFloat(seconds.toFixed(2));
+      // } else if (interval >= 100 && interval < 1000) {
+      //   return parseFloat(seconds.toFixed(1));
+      // }
+
+      return Math.floor(seconds);
+    },
+
+    /**
+     * Helper function - converts milliseconds to minutes
+     * @private
+     * @emits Countdown#countdowntimeelapsed
+     */
+    convertToMinutes(time) {
+      return Math.floor((time % MILLISECONDS_HOUR) / MILLISECONDS_MINUTE);
+    },
+
+    /**
+     * Helper function - converts milliseconds to minutes
+     * @private
+     * @emits Countdown#countdowntimeelapsed
+     */
+    formatTime(time, type) {
+      if (time < 10) {
+        time = `0${time}`;
+        return time;
+      }
+      return time;
+    },
+
+    /**
+     * Get time elapsed since countdown began.
+     * @public
+     * @emits Countdown#countdowntimeelapsed
+     */
+    getTimeElapsed(elapsed = 0) {
+      if (elapsed > 0) {
+        const timeElapsed = elapsed;
+      } else {
+        const timeElapsed = this.initialCount - this.count;
+      }
+      return (
+        `${this.formatTime(this.convertToMinutes(timeElapsed))}` +
+        `:${this.formatTime(this.convertToSeconds(timeElapsed))}`
+      );
     },
 
     /**

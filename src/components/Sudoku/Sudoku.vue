@@ -21,92 +21,196 @@
           </v-card>
         </v-dialog>
       </v-layout>
-      <CountDown :time="10 * 60 * 1000" ref="puzzleTimer">
+      <CountDown :time="countdownTimer" ref="puzzleTimer">
         <template slot-scope="props">
           <div class="timer">
             {{ props.minutes }} minutes, {{ props.seconds }} seconds.
           </div>
         </template>
       </CountDown>
-      <h1>SudokuJS simple demo</h1>
-      <!--the only required html-->
+      <br><h1>Complete before time up!</h1> <br>
+      <!--sudoku board-->
       <div id="sudoku" class="sudoku-board">
+
       </div>
+      		Solve: <button type="button" class="js-solve-step-btn">One Step</button>
+		<button type="button" class="js-solve-all-btn">All</button>
     </div>
 </template>
 
 <script>
-import { mapState } from 'vuex';
-import CountDown from '@/components/countdown';
+import CountDown from '@/components/countdown.vue';
+import { mapMutations, mapState } from 'vuex';
+import firebase from '../../config/firebaseinit';
 
-const board = [,  
-  5,,  ,
-  ,
-  
-  2,
-  3,
-  8,,
-  ,
-  
-  1,,  ,
-  ,
-  
-  4,,
-  ,
-  
-  5,,  
-  2,,
-  ,
-  
-  5,,  ,
+const board = [
   ,
   ,
-  
-  5,,  
   7,
-  8,,
+  9,
   ,
-  
-  2,
-  1,,  
+  1,
+  ,
   4,
-  6,,  
+  ,
+  2,
+  ,
+  ,
+  ,
+  ,
+  5,
+  1,
+  ,
+  ,
+  8,
+  9,
+  ,
+  ,
+  ,
+  ,
+  ,
+  ,
+  5,
+  ,
+  4,
+  2,
+  ,
+  3,
+  ,
+  ,
+  6,
+  ,
+  1,
+  ,
+  3,
+  ,
+  9,
+  ,
+  4,
+  ,
+  7,
+  ,
+  8,
+  ,
+  ,
+  1,
+  ,
+  2,
+  5,
+  ,
+  9,
+  ,
+  ,
+  ,
+  ,
+  ,
+  ,
+  3,
+  2,
+  ,
+  ,
+  8,
+  7,
+  ,
+  ,
+  ,
+  ,
+  4,
+  ,
+  1,
+  ,
+  3,
+  ,
+  2,
+  6,
+  ,
+  ,
+];
+
+const correctBoard = [
+  5,
+  6,
+  7,
+  9,
+  2,
+  1,
+  3,
+  4,
+  8,
   2,
   3,
-  7,,  
-  5,
-  8,,  
-  9,
-  8,,
-  ,
-  
-  5,
-  4,,  
-  7,,  ,
-  ,
-  ,
-  
-  6,,
-  ,
-  
-  4,,  
-  1,,
-  ,
-  
-  9,,  ,
-  ,
-  
-  6,,
-  ,
-  
+  4,
+  8,
   7,
-  3,
-  4,,  ,
-  ,
-  
+  5,
+  1,
   9,
-  undefined,
+  6,
+  8,
+  9,
+  1,
+  6,
+  4,
+  3,
+  7,
+  2,
+  5,
+  7,
+  4,
+  2,
+  5,
+  3,
+  8,
+  9,
+  6,
+  1,
+  1,
+  5,
+  3,
+  2,
+  9,
+  6,
+  4,
+  8,
+  7,
+  6,
+  8,
+  9,
+  4,
+  1,
+  7,
+  2,
+  5,
+  3,
+  9,
+  7,
+  6,
+  1,
+  5,
+  4,
+  8,
+  3,
+  2,
+  3,
+  2,
+  8,
+  7,
+  6,
+  9,
+  5,
+  1,
+  4,
+  4,
+  1,
+  5,
+  3,
+  8,
+  2,
+  6,
+  7,
+  9,
 ];
+
 export default {
   components: {
     CountDown,
@@ -116,6 +220,9 @@ export default {
       dialog: false,
       shownHints: 0,
       ignoredHints: 0,
+      mySudoku: null,
+      countdownTimer: 600000,
+      indicesOfNonePreFilledCells: [],
     };
   },
   watch: {
@@ -123,6 +230,7 @@ export default {
       if (val) {
         this.$refs.puzzleTimer.pause();
         this.$refs.hintTimer.restart();
+        console.log(this.calculateBoardCompletionPerc());
       }
       if (!val) {
         this.$refs.puzzleTimer.start();
@@ -134,31 +242,89 @@ export default {
     ...mapState('sudoku', ['userControlGroup']),
   },
   methods: {
+    ...mapMutations('main', ['changeAppDisplay']),
     showHint() {
       this.dialog = false;
       this.shownHints = this.shownHints + 1;
+      this.mySudoku.solveStep();
     },
     ignoreHint() {
       this.dialog = false;
       this.ignoredHints = this.ignoredHints + 1;
     },
+    calculateBoardCompletionPerc() {
+      let correctAnswers = 0;
+      const totalInitialBlankCells = this.indicesOfNonePreFilledCells.length;
+      const currentBoard = Object.values(this.mySudoku.getBoard());
+      this.indicesOfNonePreFilledCells.forEach((val, index) => {
+        if (currentBoard[val].val === correctBoard[val]) {
+          correctAnswers++;
+        }
+      });
+      return (correctAnswers / totalInitialBlankCells * 100).toFixed(2);
+    },
+    saveDataOnPuzzleEnd(message) {
+      const date = new Date();
+      firebase
+        .database()
+        .ref()
+        .child(`/surveys/${this.key}`)
+        .update({
+          shownHints: this.shownHints,
+          ignoredHints: this.ignoredHints,
+          completedAt: `${date.toDateString()} ${date.getUTCHours()}:${date.getUTCMinutes()}`,
+          timeElapsed:
+            message === 'time up'
+              ? this.$refs.puzzleTimer.getTimeElapsed(this.countdownTimer)
+              : this.$refs.puzzleTimer.getTimeElapsed(),
+          completion:
+            message === 'solved' ? 100 : this.calculateBoardCompletionPerc(),
+        });
+    },
+    timeUpOrPuzzleSolved(message) {
+      console.log(message);
+      this.saveDataOnPuzzleEnd(message);
+      this.changeAppDisplay(-1);
+    },
   },
   mounted() {
+    // Generate board
     require('./sudokuJS.js');
+    const self = this;
     const mySudokuJS = $('#sudoku').sudokuJS({
       board,
+      boardFinishedFn(data) {
+        self.timeUpOrPuzzleSolved('solved');
+      },
     });
+    this.mySudoku = mySudokuJS;
     $('.js-solve-step-btn').on('click', mySudokuJS.solveStep);
     $('.js-solve-all-btn').on('click', mySudokuJS.solveAll);
   },
   created() {
+    // interval for pop ups
     setInterval(() => {
       this.dialog = true;
+      // auto close popup after x seconds
       setTimeout(() => {
+        if (this.dialog) {
+          this.ignoredHints = this.ignoredHints + 1;
+        }
         this.dialog = false;
-        this.ignoredHints = this.ignoredHints + 1;
       }, 20000);
     }, this.userControlGroup * 1000);
+    // End puzzle on time up
+    setTimeout(() => {
+      this.timeUpOrPuzzleSolved('time up');
+    }, this.countdownTimer);
+
+    for (let i = 0; i < board.length; i++) {
+      if (board[i]) {
+        // console.log(i)
+      } else {
+        this.indicesOfNonePreFilledCells.push(i);
+      }
+    }
   },
 };
 </script>
