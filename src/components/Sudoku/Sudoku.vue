@@ -33,8 +33,8 @@
       <div id="sudoku" class="sudoku-board">
 
       </div>
-      		Solve: <button type="button" class="js-solve-step-btn">One Step</button>
-		<button type="button" class="js-solve-all-btn">All</button>
+      		<!-- Solve: <button type="button" class="js-solve-step-btn">One Step</button>
+		<button type="button" class="js-solve-all-btn">All</button> -->
     </div>
 </template>
 
