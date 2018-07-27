@@ -303,16 +303,19 @@ export default {
   },
   created() {
     // interval for pop ups
-    setInterval(() => {
-      this.dialog = true;
-      // auto close popup after x seconds
-      setTimeout(() => {
-        if (this.dialog) {
-          this.ignoredHints = this.ignoredHints + 1;
-        }
-        this.dialog = false;
-      }, 20000);
-    }, this.userControlGroup * 1000);
+    if (this.userControlGroup === 0) {
+      setInterval(() => {
+        this.dialog = true;
+        // auto close popup after x seconds
+        setTimeout(() => {
+          if (this.dialog) {
+            this.ignoredHints = this.ignoredHints + 1;
+          }
+          this.dialog = false;
+        }, 20000);
+      }, this.userControlGroup * 1000);
+    }
+
     // End puzzle on time up
     setTimeout(() => {
       this.timeUpOrPuzzleSolved('time up');

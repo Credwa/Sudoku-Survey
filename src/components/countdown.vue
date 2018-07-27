@@ -305,10 +305,11 @@ export default {
      * @emits Countdown#countdowntimeelapsed
      */
     getTimeElapsed(elapsed = 0) {
+      let timeElapsed;
       if (elapsed > 0) {
-        const timeElapsed = elapsed;
+        timeElapsed = elapsed;
       } else {
-        const timeElapsed = this.initialCount - this.count;
+        timeElapsed = this.initialCount - this.count;
       }
       return (
         `${this.formatTime(this.convertToMinutes(timeElapsed))}` +
