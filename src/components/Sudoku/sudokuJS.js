@@ -626,7 +626,7 @@
 
             //log("fill in single empty cell " + emptyCell.cell+", val: "+val);
 
-            setBoardCell(emptyCell.cell, val[0]); //does not update UI
+            // setBoardCell(emptyCell.cell, val[0]); //does not update UI
             if (solveMode === SOLVE_MODE_STEP)
               uIBoardHighlightCandidate(emptyCell.cell, val[0]);
 
@@ -710,7 +710,7 @@
 
               //log("only slot where "+digit+" appears in house. ");
 
-              setBoardCell(cellIndex, digit); //does not update UI
+              // setBoardCell(cellIndex, digit); //does not update UI
 
               if (solveMode === SOLVE_MODE_STEP)
                 uIBoardHighlightCandidate(cellIndex, digit);
@@ -750,7 +750,7 @@
 
           //log("only one candidate in cell: "+digit+" in house. ");
 
-          setBoardCell(i, digit); //does not update UI
+          // setBoardCell(i, digit); //does not update UI
           if (solveMode === SOLVE_MODE_STEP)
             uIBoardHighlightCandidate(i, digit);
 
@@ -1254,18 +1254,19 @@
         }
       }
 
-      nrSolveLoops++;
+      // nrSolveLoops++;
       var strat = strategies[i].fn;
-      //log("use strat nr:" +i);
-      effectedCells = strat();
 
+      effectedCells = strat();
+      //log("use strat nr:" +i);
+      console.log("Strat: ", strat);
+      console.log("Effected Cells: ", effectedCells);
       if (effectedCells === false) {
         if (strategies.length > i + 1) {
           return solveFn(i + 1);
         } else {
           if (typeof opts.boardErrorFn === "function" && !generatingMode)
             opts.boardErrorFn({ msg: "no more strategies" });
-
           if (!gradingMode && !generatingMode && solveMode === SOLVE_MODE_ALL)
             updateUIBoard(false);
           return false;
@@ -1273,11 +1274,9 @@
       } else if (boardError) {
         if (typeof opts.boardErrorFn === "function")
           opts.boardErrorFn({ msg: "Board incorrect" });
-
         if (solveMode === SOLVE_MODE_ALL) {
           updateUIBoard(false); //show user current state of board... how much they need to reset for it to work again.
         }
-
         return false; //we can't do no more solving
       } else if (solveMode === SOLVE_MODE_STEP) {
         // if user clicked solve step, and we're only going to fill in a new value (not messing with candidates) - then show user straight away
@@ -1289,7 +1288,7 @@
           });
         }
 
-        //check if this finished the board
+        // //check if this finished the board
         if (isBoardFinished()) {
           boardFinished = true;
           //callback
@@ -1319,7 +1318,7 @@
         }
       }
 
-      //we got an answer, using strategy i
+      // //we got an answer, using strategy i
       if (typeof usedStrategies[i] === "undefined") usedStrategies[i] = 0;
       usedStrategies[i] = usedStrategies[i] + 1;
       //if we only updated candidates, make sure they're showing

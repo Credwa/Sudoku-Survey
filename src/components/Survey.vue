@@ -125,6 +125,7 @@ export default {
   },
   methods: {
     ...mapMutations('main', ['changeAppDisplay', 'setUserKey']),
+    ...mapMutations('sudoku', ['newUser']),
     genderChange() {
       this.e1++;
     },
@@ -145,29 +146,39 @@ export default {
       this.e1--;
     },
     submit() {
-      this.loading = true;
       const date = new Date();
+      const user = {
+        gender: this.gender,
+        referralSite: this.refer === 'Other' ? this.other : this.refer,
+        experience: this.experience,
+        created: `${date.toDateString()} ${date.getUTCHours()}:${date.getUTCMinutes()}`,
+      };
+      this.newUser(user);
+      this.changeAppDisplay(1);
+    },
+    async getUserIP() {
+      const response = await fetch('https://api.ipify.org?format=json');
+      const json = await response.json();
+      this.compareIPs(json.ip);
+    },
+    compareIPs(ip) {
       firebase
         .database()
-        .ref('surveys/')
-        .push({
-          gender: this.gender,
-          referralSite: this.refer === 'Other' ? this.other : this.refer,
-          experience: this.experience,
-          created: `${date.toDateString()} ${date.getUTCHours()}:${date.getUTCMinutes()}`,
-        })
-        .then((res) => {
-          this.setUserKey(res.key);
-          setTimeout(() => {
-            this.loading = false;
-            this.changeAppDisplay(1);
-          }, 2000);
-        })
-        .catch((err) => {
-          console.log(err);
-          this.loading = false;
+        .ref('/user-ip-list')
+        .once('value')
+        .then((snapshot) => {
+          console.log(snapshot.val());
+          const allIps = snapshot.val();
+          Object.values(allIps).forEach((val) => {
+            if (val.IP === ip) {
+              this.changeAppDisplay(-1);
+            }
+          });
         });
     },
+  },
+  created() {
+    this.getUserIP();
   },
 };
 </script>

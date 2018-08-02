@@ -10,7 +10,6 @@
 
 <script>
 import { mapMutations, mapState } from 'vuex';
-import firebase from '../config/firebaseinit';
 
 export default {
   data() {
@@ -20,24 +19,20 @@ export default {
   },
   computed: {
     ...mapState('main', ['key']),
+    ...mapState('sudoku', ['key', 'user']),
   },
   methods: {
     ...mapMutations('main', ['changeAppDisplay']),
-    ...mapMutations('sudoku', ['newControlGroup']),
+    ...mapMutations('sudoku', ['newControlGroup', 'newUser']),
     getControlGroup() {
       const num = Math.random() * 6;
       return Math.round(num);
     },
     beginPuzzle() {
       const group = this.intervals[this.getControlGroup()];
+      const user = { ...this.user, group };
+      this.newUser(user);
       this.newControlGroup(group);
-      firebase
-        .database()
-        .ref()
-        .child(`/surveys/${this.key}`)
-        .update({
-          controlGroup: group,
-        });
       this.changeAppDisplay(2);
     },
   },

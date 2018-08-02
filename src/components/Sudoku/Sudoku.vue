@@ -33,8 +33,10 @@
       <div id="sudoku" class="sudoku-board">
 
       </div>
-      		<!-- Solve: <button type="button" class="js-solve-step-btn">One Step</button>
-		<button type="button" class="js-solve-all-btn">All</button> -->
+    <!-- <div>
+      Solve: <button type="button" class="js-solve-step-btn">One Step</button>
+      <button type="button" class="js-solve-all-btn">All</button>
+    </div> -->
     </div>
 </template>
 
@@ -223,6 +225,7 @@ export default {
       mySudoku: null,
       countdownTimer: 600000,
       indicesOfNonePreFilledCells: [],
+      ip: null,
     };
   },
   watch: {
@@ -239,7 +242,7 @@ export default {
   },
   computed: {
     ...mapState('main', ['key']),
-    ...mapState('sudoku', ['userControlGroup']),
+    ...mapState('sudoku', ['userControlGroup', 'user']),
   },
   methods: {
     ...mapMutations('main', ['changeAppDisplay']),
@@ -261,15 +264,23 @@ export default {
           correctAnswers++;
         }
       });
+      console.log(currentBoard);
+      console.log(correctAnswers);
+      console.log(totalInitialBlankCells);
       return (correctAnswers / totalInitialBlankCells * 100).toFixed(2);
+    },
+    async getUserIP() {
+      const response = await fetch('https://api.ipify.org?format=json');
+      const json = await response.json();
+      this.ip = json.ip;
     },
     saveDataOnPuzzleEnd(message) {
       const date = new Date();
       firebase
         .database()
-        .ref()
-        .child(`/surveys/${this.key}`)
-        .update({
+        .ref('/surveys')
+        .push({
+          userSurveyInfo: this.user,
           shownHints: this.shownHints,
           ignoredHints: this.ignoredHints,
           completedAt: `${date.toDateString()} ${date.getUTCHours()}:${date.getUTCMinutes()}`,
@@ -279,6 +290,19 @@ export default {
               : this.$refs.puzzleTimer.getTimeElapsed(),
           completion:
             message === 'solved' ? 100 : this.calculateBoardCompletionPerc(),
+          userIPAddress: this.ip,
+        });
+      firebase
+        .database()
+        .ref('user-ip-list/')
+        .push({
+          IP: this.ip,
+        })
+        .then((res) => {
+          console.log('ip saved');
+        })
+        .catch((err) => {
+          console.log(err);
         });
     },
     timeUpOrPuzzleSolved(message) {
@@ -302,25 +326,27 @@ export default {
     $('.js-solve-all-btn').on('click', mySudokuJS.solveAll);
   },
   created() {
+    const self = this;
+    this.getUserIP();
     // interval for pop ups
-    if (this.userControlGroup === 0) {
+    if (this.userControlGroup !== 0) {
       setInterval(() => {
         this.dialog = true;
-        // auto close popup after x seconds
         setTimeout(() => {
-          if (this.dialog) {
-            this.ignoredHints = this.ignoredHints + 1;
+          if (self.dialog) {
+            self.ignoredHints++;
+            self.dialog = false;
           }
-          this.dialog = false;
         }, 20000);
       }, this.userControlGroup * 1000);
     }
 
     // End puzzle on time up
     setTimeout(() => {
-      this.timeUpOrPuzzleSolved('time up');
+      self.timeUpOrPuzzleSolved('time up');
     }, this.countdownTimer);
 
+    // Save
     for (let i = 0; i < board.length; i++) {
       if (board[i]) {
         // console.log(i)
