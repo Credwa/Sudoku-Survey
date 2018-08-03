@@ -23,7 +23,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // })
 
 app.get('/', (req, res) => {
-  // check if request is made from ios or none ios device when serve proper folder
   app.use(express.static(`${__dirname}/dist`));
   res.sendFile(path.join(`${__dirname}/dist/index.html`));
 });
