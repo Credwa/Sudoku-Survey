@@ -167,7 +167,6 @@ export default {
         .ref('/user-ip-list')
         .once('value')
         .then((snapshot) => {
-          console.log(snapshot.val());
           const allIps = snapshot.val();
           Object.values(allIps).forEach((val) => {
             if (val.IP === ip) {

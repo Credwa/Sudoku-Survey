@@ -4,5 +4,6 @@ export default {
     isTutorial: false,
     isPlaying: false,
   },
+  isAdminLoggedIn: false,
   key: null,
 };

@@ -233,7 +233,7 @@ export default {
       if (val) {
         this.$refs.puzzleTimer.pause();
         this.$refs.hintTimer.restart();
-        console.log(this.calculateBoardCompletionPerc());
+        // console.log(this.calculateBoardCompletionPerc());
       }
       if (!val) {
         this.$refs.puzzleTimer.start();
@@ -264,9 +264,6 @@ export default {
           correctAnswers++;
         }
       });
-      console.log(currentBoard);
-      console.log(correctAnswers);
-      console.log(totalInitialBlankCells);
       return (correctAnswers / totalInitialBlankCells * 100).toFixed(2);
     },
     async getUserIP() {
@@ -327,6 +324,13 @@ export default {
   },
   created() {
     const self = this;
+    firebase
+      .database()
+      .ref('/admin-data')
+      .once('value')
+      .then((snapshot) => {
+        self.countdownTimer = snapshot.val().timer;
+      });
     this.getUserIP();
     // interval for pop ups
     if (this.userControlGroup !== 0) {
