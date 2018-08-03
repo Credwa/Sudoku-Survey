@@ -10,6 +10,7 @@
 
 <script>
 import { mapMutations, mapState } from 'vuex';
+import firebase from '../config/firebaseinit';
 
 export default {
   data() {
@@ -25,16 +26,32 @@ export default {
     ...mapMutations('main', ['changeAppDisplay']),
     ...mapMutations('sudoku', ['newControlGroup', 'newUser']),
     getControlGroup() {
-      const num = Math.random() * 6;
+      const num = Math.random() * (this.intervals.length - 1);
       return Math.round(num);
     },
     beginPuzzle() {
       const group = this.intervals[this.getControlGroup()];
+
+      // add group to user variable in store
       const user = { ...this.user, group };
       this.newUser(user);
+
       this.newControlGroup(group);
+
       this.changeAppDisplay(2);
     },
+  },
+  created() {
+    // get control values from firebase and store them in a variable
+    // any 0 means no hints shown
+    // overwrites the default intervals value
+    firebase
+      .database()
+      .ref('/admin-data/intervals')
+      .once('value')
+      .then((snapshot) => {
+        this.intervals = snapshot.val();
+      });
   },
 };
 </script>
